@@ -11,7 +11,12 @@ interface IPosition {
     z: number
 }
 
-const MovementLogger = () => {
+interface IMovementArguments {
+    clickStatus?: string | null;
+    setClickStatus?: (argument: null | 'left' | 'right') => void;
+}
+
+const MovementLogger = ({clickStatus, setClickStatus}: IMovementArguments) => {
     const [lastPosition, setLastPosition] = useState<null | IPosition>(null);
     const [isMoving, setIsMoving] = useState(false);
     const [socket, setSocket] = useState<null | Socket>(null);
@@ -84,6 +89,16 @@ const MovementLogger = () => {
             console.log('Emitted value:', dataToSend);
         }
     }, [lastPosition, socket]);
+
+    useEffect(() => {
+        if (socket && socket.connected) {
+            socket.emit('click', clickStatus);
+            console.log('Emitted value:', clickStatus);
+            if (setClickStatus) {
+                setClickStatus(null);
+            }
+        }
+    }, [clickStatus, setClickStatus, socket]);
 
     return (
         // eslint-disable-next-line react-native/no-inline-styles
