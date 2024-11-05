@@ -8,7 +8,7 @@ import { io, Socket } from 'socket.io-client';
 interface IPosition {
     x: number,
     y: number,
-    z: number
+    z?: number
 }
 
 interface IMovementArguments {
@@ -22,15 +22,14 @@ const MovementLogger = ({clickStatus, setClickStatus}: IMovementArguments) => {
     const [socket, setSocket] = useState<null | Socket>(null);
     const url = 'http://127.0.0.1:5000';
 
-    const hasChanged = useCallback(({ x, y, z }: IPosition): boolean => {
-        const MOVEMENT_THRESHOLD = 0.1;
+    const hasChanged = useCallback(({ x, y}: IPosition): boolean => {
+        const MOVEMENT_THRESHOLD = 0.03;
         if (lastPosition) {
 
             const diffX = x - lastPosition.x;
             const diffY = y - lastPosition.y;
-            const diffZ = z - lastPosition.z;
 
-            if (Math.abs(diffX) > MOVEMENT_THRESHOLD || Math.abs(diffY) > MOVEMENT_THRESHOLD || Math.abs(diffZ) > MOVEMENT_THRESHOLD) {
+            if (Math.abs(diffX) > MOVEMENT_THRESHOLD || Math.abs(diffY) > MOVEMENT_THRESHOLD) {
                 return true;
             }
             return false;
@@ -47,8 +46,8 @@ const MovementLogger = ({clickStatus, setClickStatus}: IMovementArguments) => {
         const subscription: Subscription = accelerometer.subscribe(({ x, y, z }) => {
             setIsMoving(false);
             // Log the movement values to the console
-            if (!lastPosition || hasChanged({ x, y, z })) {
-                setLastPosition({ x, y, z });
+            if (!lastPosition || hasChanged({ x, y })) {
+                setLastPosition({ x, y});
                 setIsMoving(true);
                 console.log(`Movement detected: x: ${x}, y: ${y}, z: ${z}`);
             }
